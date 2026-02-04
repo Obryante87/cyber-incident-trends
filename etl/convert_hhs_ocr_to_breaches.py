@@ -43,13 +43,37 @@ def main():
         + pd.to_datetime(df[date_col], errors="coerce").dt.strftime("%Y%m%d").fillna("unknown")
     )
 
-    out["location"] = df[state_col].astype(str) if state_col else (df[loc_col].astype(str) if loc_col else "unknown")
+    # Ensure event_id is unique even if multiple rows collide on the same slug
+    out["event_id"] = out["event_id"].astype(str)
+    dup_mask = out["event_id"].duplicated(keep=False)
+
+    if dup_mask.any():
+        # Add a suffix for duplicates: -dup1, -dup2, ...
+        out.loc[dup_mask, "event_id"] = (
+            out.loc[dup_mask]
+               .groupby("event_id")
+               .cumcount()
+               .add(1)
+               .astype(str)
+               .radd(out.loc[dup_mask, "event_id"] + "-dup")
+        )
+
+    # continue normally (NOT inside the if)
+    out["location"] = (
+        df[state_col].astype(str)
+        if state_col
+        else (df[loc_col].astype(str) if loc_col else "unknown")
+    )
     out["source_url"] = "https://ocrportal.hhs.gov/ocr/breach/breach_report.jsf"
 
-    out = out[["event_id","event_date","industry","breach_type","records_affected","location","source_url"]]
+    out = out[
+        ["event_id","event_date","industry","breach_type",
+         "records_affected","location","source_url"]
+    ]
     out = out.dropna(subset=["event_date"])
     out.to_csv(OUT_PATH, index=False)
     print(f"Wrote {len(out)} rows -> {OUT_PATH}")
 
 if __name__ == "__main__":
     main()
+
