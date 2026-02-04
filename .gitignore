@@ -13,3 +13,4 @@ __pycache__/
 Thumbs.db
 # Data files (don’t commit real datasets)
 data/*.csv
+models/artifacts/*.joblib
