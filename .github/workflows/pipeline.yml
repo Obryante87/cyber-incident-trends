@@ -1,0 +1,32 @@
+name: nightly-pipeline
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # daily 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create env file
+        run: |
+          cp .env.example .env
+      - name: Build and start services
+        run: |
+          docker compose up -d --build db
+          sleep 10
+          docker compose up -d --build etl
+      - name: Run marts build
+        run: |
+          docker compose run --rm etl python build_marts.py
+      - name: Train model
+        run: |
+          docker compose run --rm models
+      - name: Smoke check app build
+        run: |
+          docker compose build app
+      - name: Shutdown
+        if: always()
+        run: docker compose down -v
