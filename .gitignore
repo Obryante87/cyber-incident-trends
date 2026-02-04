@@ -1,0 +1,13 @@
+# Environment variables / secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Docker
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
