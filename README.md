@@ -1,37 +1,66 @@
-# cyber-incident-trends
+# Cybersecurity Incident Trends & Risk Analytics
 
-# Cyber Incident Trends & Ransomware Risk Explorer
+## Overview
+This project is an end-to-end cybersecurity analytics platform designed to ingest, enrich, analyze, and visualize **real-world breach and vulnerability data**. It combines public breach disclosures with known exploited vulnerabilities (KEV) and NVD CVSS scoring to surface trends, quantify risk, and support executive decision-making.
 
-## What this is
-End-to-end analytics product:
-- Ingest KEV (CISA) and breach events (CSV export)
-- Enrich CVEs via NVD (optional API key)
-- Build marts for trends + ransomware + KEV pressure
-- Train a baseline model predicting high impact (proxy)
-- Serve an executive dashboard in Streamlit
+The system follows a production-style analytics workflow: data ingestion → enrichment → feature engineering → analytics marts → dashboards.
 
-## Quick start
-1) Copy `.env.example` to `.env` and set values.
-2) Start Postgres + initial KEV ingest:
-   - `docker compose up -d --build db etl`
-3) Build marts:
-   - `docker compose run --rm etl python build_marts.py`
-4) (Optional) Enrich KEV CVEs via NVD:
-   - `docker compose run --rm etl python enrich_nvd.py`
-   - then rebuild marts
-5) Train model:
-   - `docker compose run --rm models`
-6) Start dashboard:
-   - `docker compose up -d --build app`
-   - Open http://localhost:8501
+---
 
-## Breach data
-Provide a breach CSV at `./data/breaches.csv` or set `BREACH_CSV_PATH`.
-Required columns:
-- event_id, event_date, industry, breach_type, records_affected, location, source_url
-Optional columns:
-- organization, description
+## Key Questions Addressed
+- Which sectors experience the highest breach and ransomware activity?
+- How are breach frequency and severity trending over time?
+- How does vulnerability pressure (KEV + CVSS) relate to breach impact?
+- What conditions are associated with high-impact (“mega”) breaches?
 
-## Notes
-- "High impact" target uses mega_breach proxy (records_affected >= 1,000,000).
-- Public breach reporting is incomplete and biased; interpret trends carefully.
+---
+
+## Data Sources
+- **HHS OCR Breach Portal** – Public healthcare breach disclosures  
+- **CISA Known Exploited Vulnerabilities (KEV) Catalog**  
+- **NIST National Vulnerability Database (NVD)** – CVSS enrichment  
+
+> **Note:** Raw datasets are not committed to this repository. Instructions for obtaining data are provided below.
+
+---
+
+## Architecture
+
+**Ingestion → Enrichment → Feature Engineering → Analytics → Visualization**
+
+1. **Ingestion**
+   - Normalizes breach disclosures into a unified schema
+   - Ingests KEV CVEs from CISA
+
+2. **Enrichment**
+   - Enriches CVEs with CVSS v3 and v2 metrics from NVD
+   - Handles API rate limiting, retries, and partial failures gracefully
+
+3. **Feature Engineering**
+   - Ransomware indicators
+   - Mega-breach flags
+   - Rolling KEV pressure windows (30/90 days)
+   - Monthly severity aggregation
+
+4. **Analytics Marts**
+   - Industry time-series metrics
+   - Vulnerability pressure metrics
+   - Model-ready training datasets
+
+5. **Visualization**
+   - Interactive Streamlit dashboards
+   - Executive-style trend analysis
+
+---
+
+## Repository Structure
+cyber-incident-trends/
+├── app/                 # Streamlit dashboards
+├── etl/                 # Ingestion, enrichment, mart building
+├── models/              # Risk modeling & training code
+├── db/                  # Database schemas
+├── ops/                 # Docker & orchestration
+├── docker-compose.yml
+├── .env.example
+└── README.md
+
