@@ -3,7 +3,8 @@
 ## Overview
 This project is an end-to-end cybersecurity analytics platform designed to ingest, enrich, analyze, and visualize **real-world breach and vulnerability data**. It combines public breach disclosures with known exploited vulnerabilities (KEV) and NVD CVSS scoring to surface trends, quantify risk, and support executive decision-making.
 
-The system follows a production-style analytics workflow: data ingestion → enrichment → feature engineering → analytics marts → dashboards.
+The system follows a production-style analytics workflow:
+**data ingestion → enrichment → feature engineering → analytics marts → dashboards**.
 
 ---
 
@@ -20,12 +21,11 @@ The system follows a production-style analytics workflow: data ingestion → enr
 - **CISA Known Exploited Vulnerabilities (KEV) Catalog**  
 - **NIST National Vulnerability Database (NVD)** – CVSS enrichment  
 
-> **Note:** Raw datasets are not committed to this repository. Instructions for obtaining data are provided below.
+> **Note:** Raw datasets are not committed to this repository. Scripts are provided to convert and ingest public data sources reproducibly.
 
 ---
 
 ## Architecture
-
 **Ingestion → Enrichment → Feature Engineering → Analytics → Visualization**
 
 1. **Ingestion**
@@ -38,7 +38,7 @@ The system follows a production-style analytics workflow: data ingestion → enr
 
 3. **Feature Engineering**
    - Ransomware indicators
-   - Mega-breach flags
+   - Mega-breach flags (records_affected ≥ 1,000,000)
    - Rolling KEV pressure windows (30/90 days)
    - Monthly severity aggregation
 
@@ -54,6 +54,7 @@ The system follows a production-style analytics workflow: data ingestion → enr
 ---
 
 ## Repository Structure
+```text
 cyber-incident-trends/
 ├── app/                 # Streamlit dashboards
 ├── etl/                 # Ingestion, enrichment, mart building
@@ -63,4 +64,3 @@ cyber-incident-trends/
 ├── docker-compose.yml
 ├── .env.example
 └── README.md
-
